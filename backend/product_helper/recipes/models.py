@@ -1,16 +1,17 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from .validators import HEXCodeValidator, NotZeroValidator
+from .validators import CookingTimeValidator, HEXCodeValidator
 
 User = get_user_model()
 
 MEASURE_CHOICES = [
     ('KG', 'кг.'),
     ('G', 'г.'),
-    ('ML', 'мл.'), 
+    ('ML', 'мл.'),
     ('L', 'л.'),
-    ('AN', 'по вкусу')
+    ('AN', 'по вкусу'),
+    ('UN', 'шт.')
 ]
 
 
@@ -82,7 +83,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Изображение',
-        upload_to='images/recipes',
+        upload_to='images/recipes/',
         help_text='Изображения блюда',
     )
     text = models.TextField(
@@ -103,7 +104,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
-        validators=(NotZeroValidator(),),
+        validators=(CookingTimeValidator(),),
         help_text='Время приготовления в минутах'
     )
 
@@ -125,7 +126,7 @@ class IngredientRecipe(models.Model):
     )
     amount = models.PositiveIntegerField(
         'Количество',
-        validators=(NotZeroValidator(),),
+        validators=(CookingTimeValidator(),),
         help_text='Количество игредиента'
     )
 
@@ -153,19 +154,24 @@ class Favorite(models.Model):
         Recipe,
         verbose_name='Избранные рецепты',
         on_delete=models.CASCADE,
-        related_name='user',
+        related_name='users_favorites',
         help_text='Избранные рецепты'
     )
 
     class Meta:
         ordering = ('recipe', )
-        unique_together = ('user', 'recipe')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_favorite'
+                ),
+        )
         verbose_name = 'Избранный'
         verbose_name_plural = 'Избранные'
 
     def __str__(self):
-        res = '{username}\'s favorite list recipe {recipe}'
-        return res.format(username=self.user.username, recipe=self.recipe.title)
+        res = "{username}'s favorite list recipe {recipe}"
+        return res.format(username=self.user.username, recipe=self.recipe.name)
 
 
 class ShoppingCart(models.Model):
@@ -188,8 +194,13 @@ class ShoppingCart(models.Model):
         ordering = ('recipe', )
         verbose_name = 'Элемент списка покупок'
         verbose_name_plural = 'Элементы списка покупок'
-        unique_together = ('user', 'recipe')
-        
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_cart_item'
+                ),
+        )
+
     def __str__(self) -> str:
-        res = '{username}\'s shopping list recipe {recipe}'
+        res = "{username}'s shopping list recipe {recipe}"
         return res.format(username=self.user.username, recipe=self.recipe.name)

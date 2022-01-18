@@ -1,9 +1,9 @@
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers, relations
-from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
 
 from users.serializers import CustomUserSerializer
-from .models import Favorite, Tag, Recipe, Ingredient, IngredientRecipe, ShoppingCart, MEASURE_CHOICES
+from .models import (MEASURE_CHOICES, Favorite, Ingredient,
+                     IngredientRecipe, Recipe, ShoppingCart, Tag)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -25,6 +25,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         res['measurement_unit'] = value.get_measurement_unit_display()
         return res
 
+
 class IngredientAmountReadSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient.id',
@@ -43,7 +44,8 @@ class IngredientAmountReadSerializer(serializers.ModelSerializer):
 
     def to_representation(self, value):
         res = super().to_representation(value)
-        res['measurement_unit'] = value.ingredient.get_measurement_unit_display()
+        ingredient = value.ingredient
+        res['measurement_unit'] = ingredient.get_measurement_unit_display()
         return res
 
 
@@ -85,36 +87,26 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'id',
-            'name', 
-            'cooking_time',
-            'author', 
-            'ingredients',
-            'tags',
-            'image',
-            'text',
-            'is_favorited',
-            'is_in_shopping_cart',
-        )
+            'id', 'name', 'cooking_time', 'author', 'ingredients',
+            'tags', 'image', 'text', 'is_favorited', 'is_in_shopping_cart'
+            )
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return user.favorites.filter(recipe=obj).exists()
+        return (not user.is_anonymous and
+                user.favorites.filter(recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return user.shopping_list.filter(recipe=obj).exists()
+        return (not user.is_anonymous and
+                user.shopping_list.filter(recipe=obj).exists())
 
 
 class SimpleRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         max_length=None,
         use_url=True,
-        required=False
+        required=True
     )
 
     class Meta:
@@ -135,7 +127,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         max_length=None,
         use_url=True,
-        required=False
+        required=True
     )
     ingredients = IngredientAmountWriteSerializer(
         many=True,
@@ -164,6 +156,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        # TODO: наверняка можно по-красивее сделать
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
@@ -179,6 +172,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
     def add_tags_and_ingredients(self, tags, ingredients, recipe):
+        # TODO: наверняка можно по-красивее сделать
         recipe.tags.set(tags)
         IngredientRecipe.objects.filter(recipe=recipe).delete()
         for ingredient in ingredients:
@@ -194,10 +188,13 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         ).data
 
+
+# TODO: Эти два почти одинаковые. Объединить?
 class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:

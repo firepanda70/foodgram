@@ -21,6 +21,16 @@ class Subscribtion(models.Model):
     )
 
     class Meta:
-        unique_together = ['user', 'author']
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_subscription'
+                ),
+        )
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        res = 'Подписка {user} на {author}'
+        return res.format(user=self.user.username,
+                          author=self.author.username)
