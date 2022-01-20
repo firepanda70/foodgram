@@ -15,6 +15,7 @@ class RecipeTagLine(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'color', 'slug')
     search_fields = ('name', 'color', 'slug')
@@ -22,12 +23,14 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = EMPTY_VALUE
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name', 'measurement_unit')
     empty_value_display = EMPTY_VALUE
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('author', 'name', 'text',
                     'cooking_time')
@@ -43,6 +46,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return '\n'.join([tag.name for tag in obj.tags.all()])
 
 
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
     search_fields = ('user', 'recipe')
@@ -50,15 +54,9 @@ class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = EMPTY_VALUE
 
 
-class ShoppingListItemAdmin(admin.ModelAdmin):
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
     search_fields = ('user', 'recipe')
     list_filter = ('user', 'recipe')
     empty_value_display = EMPTY_VALUE
-
-
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(ShoppingCart, ShoppingListItemAdmin)

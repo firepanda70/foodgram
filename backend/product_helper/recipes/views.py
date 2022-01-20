@@ -93,19 +93,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # TODO сделать humanreadable ед измерения
         response = HttpResponse(content_type='text/csv; charset="UTF-8"')
         response['Content-Disposition'] = ('attachment;'
-                                           'filename="Shopping_cart.csv"')
+                                           'filename="Shopping_cart.txt"')
         user = get_object_or_404(User, id=request.user.id)
         recipes = user.shopping_list.values_list('recipe', flat=True)
         queryset = IngredientRecipe.objects.filter(recipe__in=recipes)
         sum_queryset = queryset.values('ingredient__name',
                                        'ingredient__measurement_unit'
                                        ).annotate(Sum('amount'))
-        cvv_data = sum_queryset.values_list(
-                    'ingredient__name',
-                    'amount__sum',
-                    'ingredient__measurement_unit'
-                    )
+        args = (
+            'ingredient__name',
+            'amount__sum',
+            'ingredient__measurement_unit__get_measurement_unit_display'
+            )
+        cvv_data = sum_queryset.values_list(*args)
         writer = csv.writer(response)
-        writer.writerow(['Ингридиенты', 'Количество', 'ед. изм.'])
+        writer.writerow(('Ингридиенты', 'Количество', 'ед. изм.'))
         writer.writerows(cvv_data)
         return response
