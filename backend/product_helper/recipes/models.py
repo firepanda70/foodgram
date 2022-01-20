@@ -6,12 +6,15 @@ from .validators import CookingTimeValidator, HEXCodeValidator
 User = get_user_model()
 
 MEASURE_CHOICES = [
-    ('KG', 'кг.'),
-    ('G', 'г.'),
+    ('KG', 'кг'),
+    ('G', 'г'),
     ('ML', 'мл.'),
     ('L', 'л.'),
     ('AN', 'по вкусу'),
-    ('UN', 'шт.')
+    ('UN', 'шт.'),
+    ('MS', 'ч. л.'),
+    ('BS', 'ст. л.'),
+    ('PN', 'щепотка')
 ]
 
 

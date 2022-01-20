@@ -1,6 +1,5 @@
-import csv
+import os
 
-from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
@@ -16,6 +15,10 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
                           ShoppingCartSerializer, SimpleRecipeSerializer,
                           TagSerializer)
+
+
+FILENAME = 'Shopping_cart.txt'
+FILETYPE = 'text/plain; charset="UTF-8"'
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -90,23 +93,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
             url_name='download_shopping_cart',
             permission_classes=(permissions.IsAuthenticated,))
     def download_shopping_cart(self, request, *args, **kwargs):
-        # TODO сделать humanreadable ед измерения
-        response = HttpResponse(content_type='text/csv; charset="UTF-8"')
-        response['Content-Disposition'] = ('attachment;'
-                                           'filename="Shopping_cart.txt"')
+        # TODO сделать pdf
         user = get_object_or_404(User, id=request.user.id)
         recipes = user.shopping_list.values_list('recipe', flat=True)
-        queryset = IngredientRecipe.objects.filter(recipe__in=recipes)
-        sum_queryset = queryset.values('ingredient__name',
-                                       'ingredient__measurement_unit'
-                                       ).annotate(Sum('amount'))
-        args = (
-            'ingredient__name',
-            'amount__sum',
-            'ingredient__measurement_unit__get_measurement_unit_display'
-            )
-        cvv_data = sum_queryset.values_list(*args)
-        writer = csv.writer(response)
-        writer.writerow(('Ингридиенты', 'Количество', 'ед. изм.'))
-        writer.writerows(cvv_data)
+        queryset = IngredientRecipe.objects.filter(recipe__in=recipes).all()
+        result = {}
+        for ing_res in queryset:
+            ing = ing_res.ingredient
+            if ing.name not in result.keys():
+                result[ing.name] = {
+                    'name': ing.name,
+                    'amount': ing_res.amount,
+                    'unit': ing.get_measurement_unit_display()
+                }
+            else:
+                result[ing.name]['amount'] += ing_res.amount
+
+        lines = ['Ингридиенты, Количество, ед. изм.\n']
+        for line in result.values():
+            lines.append('{name}, {amount}, {unit}\n'.format(**line))
+
+        with open(FILENAME, 'x') as shopping_list:
+            shopping_list.writelines(lines)
+        with open(FILENAME, 'r') as shopping_list:
+            response = HttpResponse(shopping_list, content_type=FILETYPE)
+            response['Content-Disposition'] = ('attachment;'
+                                               f'filename="{FILENAME}"')
+        os.remove(os.path.abspath(FILENAME))
         return response
