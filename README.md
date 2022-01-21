@@ -67,9 +67,11 @@ python manage.py loaddata "fixtures.json"
 ```
 
 Админка тестовых данных:
+```
 email: admin@admin.admin
 username: admin
 password: admin
+```
 
 # Пример развернутого проекта на сервере:
 http://84.201.178.124/
