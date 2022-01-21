@@ -11,7 +11,7 @@ services:
       - ./.env
 
   web:
-    image: firepanda70/product_helper:v1.0.0
+    image: firepanda70/product_helper:v1.0.1
 
     restart: always
     
