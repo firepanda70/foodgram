@@ -2,13 +2,12 @@ import urllib
 
 from django_filters import rest_framework as filters
 
-from .models import Ingredient, Recipe, Tag, User
+from .models import Ingredient, Recipe, User
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.ModelMultipleChoiceFilter(
-        field_name='slug',
-        queryset=Tag.objects.all()
+    tags = filters.AllValuesMultipleFilter(
+        field_name='tags__slug',
     )
     author = filters.ModelChoiceFilter(
         queryset=User.objects.all()
