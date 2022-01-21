@@ -8,6 +8,7 @@ from .models import Ingredient, Recipe, User
 class RecipeFilter(filters.FilterSet):
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
+        conjoined=True
     )
     author = filters.ModelChoiceFilter(
         queryset=User.objects.all()
