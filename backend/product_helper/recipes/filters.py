@@ -6,7 +6,7 @@ from .models import Ingredient, Recipe, User
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.AllValuesFilter(
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
     )
     author = filters.ModelChoiceFilter(
