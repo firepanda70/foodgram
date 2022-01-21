@@ -29,33 +29,33 @@ class CustomUserViewSet(UserViewSet):
     def get_permissions(self):
         # По сравнению с методом в родительским классе,
         # изменение только с list и retrieve
-        permissions = settings.PERMISSIONS
+        perm = settings.PERMISSIONS
         if self.action in ('retrieve', 'list'):
             self.permission_classes = (permissions.AllowAny,)
         if self.action == 'create':
-            self.permission_classes = permissions.user_create
+            self.permission_classes = perm.user_create
         elif self.action == 'activation':
-            self.permission_classes = permissions.activation
+            self.permission_classes = perm.activation
         elif self.action == 'resend_activation':
-            self.permission_classes = permissions.password_reset
+            self.permission_classes = perm.password_reset
         elif self.action == 'reset_password':
-            self.permission_classes = permissions.password_reset
+            self.permission_classes = perm.password_reset
         elif self.action == 'reset_password_confirm':
-            self.permission_classes = permissions.password_reset_confirm
+            self.permission_classes = perm.password_reset_confirm
         elif self.action == 'set_password':
-            self.permission_classes = permissions.set_password
+            self.permission_classes = perm.set_password
         elif self.action == 'set_username':
-            self.permission_classes = permissions.set_username
+            self.permission_classes = perm.set_username
         elif self.action == 'reset_username':
-            self.permission_classes = permissions.username_reset
+            self.permission_classes = perm.username_reset
         elif self.action == 'reset_username_confirm':
-            self.permission_classes = permissions.username_reset_confirm
+            self.permission_classes = perm.username_reset_confirm
         elif self.action == 'destroy' or (
             self.action == 'me' and
             self.request and
             self.request.method == 'DELETE'
         ):
-            self.permission_classes = settings.PERMISSIONS.user_delete
+            self.permission_classes = perm.user_delete
         return [permission() for permission in self.permission_classes]
 
     def get_instance(self):
