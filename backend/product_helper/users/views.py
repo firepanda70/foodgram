@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.conf import settings
 from djoser.views import UserViewSet
-from rest_framework import permissions, status
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -29,33 +30,33 @@ class CustomUserViewSet(UserViewSet):
     def get_permissions(self):
         # По сравнению с методом в родительским классе,
         # изменение только с list и retrieve
-        perm = settings.PERMISSIONS
+        permissions = settings.PERMISSIONS
         if self.action in ('retrieve', 'list'):
-            self.permission_classes = (permissions.AllowAny,)
+            self.permission_classes = (AllowAny,)
         if self.action == 'create':
-            self.permission_classes = perm.user_create
+            self.permission_classes = permissions.user_create
         elif self.action == 'activation':
-            self.permission_classes = perm.activation
+            self.permission_classes = permissions.activation
         elif self.action == 'resend_activation':
-            self.permission_classes = perm.password_reset
+            self.permission_classes = permissions.password_reset
         elif self.action == 'reset_password':
-            self.permission_classes = perm.password_reset
+            self.permission_classes = permissions.password_reset
         elif self.action == 'reset_password_confirm':
-            self.permission_classes = perm.password_reset_confirm
+            self.permission_classes = permissions.password_reset_confirm
         elif self.action == 'set_password':
-            self.permission_classes = perm.set_password
+            self.permission_classes = permissions.set_password
         elif self.action == 'set_username':
-            self.permission_classes = perm.set_username
+            self.permission_classes = permissions.set_username
         elif self.action == 'reset_username':
-            self.permission_classes = perm.username_reset
+            self.permission_classes = permissions.username_reset
         elif self.action == 'reset_username_confirm':
-            self.permission_classes = perm.username_reset_confirm
+            self.permission_classes = permissions.username_reset_confirm
         elif self.action == 'destroy' or (
             self.action == 'me' and
             self.request and
             self.request.method == 'DELETE'
         ):
-            self.permission_classes = perm.user_delete
+            self.permission_classes = permissions.user_delete
         return [permission() for permission in self.permission_classes]
 
     def get_instance(self):
@@ -63,7 +64,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(methods=('get',), detail=False,
             url_path='subscriptions',
-            permission_classes=(permissions.IsAuthenticated,))
+            permission_classes=(IsAuthenticated,))
     def subscriptions(self, request, *args, **kwargs):
         # TODO: наверняка можно по-красивее сделать
         subscriptions = User.objects.filter(followers__user=request.user).all()
@@ -79,7 +80,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(methods=('post', 'delete'), detail=False,
             url_path=r'(?P<id>\d+)/subscribe',
-            permission_classes=(permissions.IsAuthenticated,))
+            permission_classes=(IsAuthenticated,))
     def subscribe(self, request, *args, **kwargs):
         # TODO: наверняка можно по-красивее сделать
         author = get_object_or_404(User, id=self.kwargs.get('id'))
