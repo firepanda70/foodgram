@@ -63,7 +63,7 @@ python3 manage.py collectstatic
 Заполнить базу данных тестовыми данными:
 
 ```
-python manage.py loaddata "fixtures.json"
+python manage.py loaddata data/fixtures.json
 ```
 
 Админка тестовых данных:
