@@ -57,7 +57,7 @@ python manage.py migrate
 Собрать статику проекта:
 
 ```
-python3 manage.py collectstatic
+python manage.py collectstatic
 ```
 
 Заполнить базу данных тестовыми данными:
@@ -73,11 +73,11 @@ username: admin
 password: admin
 ```
 
-# Пример развернутого проекта на сервере:
+### Пример развернутого проекта на сервере:
 http://84.201.178.124/
 
-# Документация API:
+### Документация API:
 http://84.201.178.124/api/docs/
 
-# Админка:
+### Админка:
 http://84.201.178.124/admin/
