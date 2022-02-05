@@ -82,5 +82,5 @@ http://84.201.178.124/api/docs/
 ### Админка:
 http://84.201.178.124/admin/
 
-### Технологии:
+# Технологии:
 Python 3, Django, PostgreSQL, Gunicorn, Nginx, Яндекс.Облако(Ubuntu 18.04), Docker
